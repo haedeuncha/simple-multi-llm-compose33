@@ -6,11 +6,14 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
-    ports: ["5433:5432"]
+    # The API container reaches this through host.docker.internal.
+    # Binding loopback keeps the database off the public network.
+    ports: ["127.0.0.1:5433:5432"]
     volumes: ["postgres_data:/var/lib/postgresql/data", "../backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro"]
   redis:
     image: redis:7-alpine
     command: redis-server --appendonly yes
-    ports: ["6379:6379"]
+    # Redis is state storage, not a public service.
+    ports: ["127.0.0.1:6379:6379"]
     volumes: ["redis_data:/data"]
 volumes: {postgres_data: {}, redis_data: {}}
